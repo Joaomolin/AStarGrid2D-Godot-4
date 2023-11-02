@@ -1,11 +1,11 @@
-[gd_scene load_steps=13 format=3 uid="uid://dbj1cglym2a2m"]
+[gd_scene load_steps=12 format=3 uid="uid://dbj1cglym2a2m"]
 
 [ext_resource type="Texture2D" uid="uid://cbcvhydljbybo" path="res://Assets/Grass.png" id="1_i3t7s"]
 [ext_resource type="Texture2D" uid="uid://ixp7fx4ysi22" path="res://Assets/Fences.png" id="2_xx8vf"]
 [ext_resource type="Texture2D" uid="uid://dnjd4r5y4k1qb" path="res://Assets/Water.png" id="3_qadt5"]
 [ext_resource type="Script" path="res://Player.gd" id="4_6usf4"]
 [ext_resource type="Texture2D" uid="uid://0mhq4mfa3c7" path="res://Assets/Basic Charakter Spritesheet.png" id="4_eo5eg"]
-[ext_resource type="Script" path="res://DebugUI.gd" id="6_x2x3h"]
+[ext_resource type="Script" path="res://WasdWalking.gd" id="5_mib8b"]
 
 [sub_resource type="TileMapPattern" id="TileMapPattern_1uoc3"]
 tile_data = PackedInt32Array(0, 131072, 4, 65536, 131072, 4, 131072, 131072, 4, 1, 131072, 4, 65537, 131072, 4, 131073, 131072, 4, 2, 131072, 4, 65538, 131072, 4, 131074, 131072, 4)
@@ -116,9 +116,6 @@ sources/1 = SubResource("TileSetAtlasSource_nto56")
 sources/2 = SubResource("TileSetAtlasSource_73l1l")
 pattern_0 = SubResource("TileMapPattern_1uoc3")
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_brjjd"]
-size = Vector2(14, 16)
-
 [node name="Node2D" type="Node2D"]
 
 [node name="TileMap" type="TileMap" parent="."]
@@ -150,6 +147,10 @@ unique_name_in_owner = true
 position = Vector2(64, 64)
 script = ExtResource("4_6usf4")
 
+[node name="Node2D" type="Node2D" parent="Player"]
+position = Vector2(-64, -64)
+script = ExtResource("5_mib8b")
+
 [node name="Camera2D" type="Camera2D" parent="Player"]
 visible = false
 zoom = Vector2(2, 2)
@@ -157,20 +158,6 @@ zoom = Vector2(2, 2)
 [node name="Sprite2D" type="Sprite2D" parent="Player"]
 self_modulate = Color(1, 1, 1, 0.368627)
 texture = ExtResource("4_eo5eg")
+offset = Vector2(8, 8)
 hframes = 4
 vframes = 4
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Player"]
-visible = false
-shape = SubResource("RectangleShape2D_brjjd")
-
-[node name="Debug" type="CanvasLayer" parent="."]
-unique_name_in_owner = true
-script = ExtResource("6_x2x3h")
-
-[node name="DebugInfoContainer" type="VBoxContainer" parent="Debug"]
-unique_name_in_owner = true
-offset_left = 4.0
-offset_top = 4.0
-offset_right = 20.0
-offset_bottom = 20.0
