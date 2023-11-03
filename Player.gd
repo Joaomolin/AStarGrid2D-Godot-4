@@ -13,8 +13,6 @@ var idPath:PackedVector2Array
 var otherIdPath:PackedVector2Array
 
 func _ready():
-	#Debug
-	Debug.add(str(self))
 	
 	#Start grid
 	grid = AStarGrid2D.new()
@@ -53,17 +51,18 @@ func _draw():
 			var _cellY = arrayOfCells[i].y * tileSize.y - get_transform().origin.y # fix vectors origin pos to upper left corner of screen
 			draw_rect(Rect2(_cellX, _cellY, tileSize.x, tileSize.y), Color.RED, false) 
 
-func get_input():
+func _get_input():
 	var _speed = 150
 	var input_direction = Input.get_vector("ui_left", "ui_right", "ui_up", "ui_down")
 	velocity = input_direction * _speed
 
-func _physics_process(delta):
+func _physics_process(_delta):
+	
 	var _xPos = str(snapped(self.position.x, 0.01))
 	var _yPos = str(snapped(self.position.y, 0.01))
-	Debug.update(str(self), "X: " + _xPos + ", Y: " + _yPos)
+	Debug.update(str(self), "PlayerPos X: " + _xPos + ", Y: " + _yPos)
 	
-	get_input()
+	_get_input()
 	move_and_slide()
 	
 	queue_redraw()
