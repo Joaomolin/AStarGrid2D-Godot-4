@@ -23,8 +23,13 @@ Debug="*res://Debug.gd"
 
 window/size/viewport_width=640
 window/size/viewport_height=640
+window/size/resizable=false
 window/stretch/mode="canvas_items"
 window/stretch/scale_mode="integer"
+
+[editor_plugins]
+
+enabled=PackedStringArray("res://addons/script-ide/plugin.cfg")
 
 [input]
 

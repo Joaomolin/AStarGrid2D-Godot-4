@@ -1,68 +1,177 @@
 extends CharacterBody2D
-#Player
-var myTile:Vector2
 
-#Start
 @onready var player: Node2D = %Player
+
+#Grid
 @onready var tileMap: TileMap = %TileMap
 @onready var tileSize = tileMap.tile_set.tile_size
+@onready var gridPlayerTile : Rect2
+@onready var gridTargetTile : Rect2
+@onready var finalTile : Vector2
 var grid: AStarGrid2D
-
-#
 var idPath:PackedVector2Array
-var otherIdPath:PackedVector2Array
+var printIdPath:PackedVector2Array
+var currentIdPath : Vector2
 
-func _ready():
+func _ready():		
 	
+	_startGrid()
+	_updateWalkableTiles()
+
+func _draw():
+	_drawPathToWalk()
+	_drawMapTiles()
+	pass
+	
+func _physics_process(_delta):
+	
+	_wasdWalk()
+	_mouseWalk()
+	_updateDebugInfo()
+	
+	queue_redraw()
+	
+func _input(event: InputEvent):	
+	if event.is_action_pressed("ui_accept"):
+		#Update end of path
+		finalTile = get_global_mouse_position()
+	
+	if !finalTile:	return
+	
+	
+#region Grid Setup
+
+func _updateWalkableTiles():
+	for x in tileMap.get_used_rect().size.x:
+		for y in tileMap.get_used_rect().size.y:
+			var tilePos = Vector2i(x + tileMap.get_used_rect().position.x, y + tileMap.get_used_rect().position.y)
+			
+			var tileData
+			
+			#Ground layer
+			tileData = tileMap.get_cell_tile_data(0, tilePos)
+			if !tileData:
+				grid.set_point_solid(tilePos)
+			
+			#Fence layer
+			tileData = tileMap.get_cell_tile_data(1, tilePos)
+			if tileData:
+				grid.set_point_solid(tilePos)
+			
+func _startGrid():	
 	#Start grid
 	grid = AStarGrid2D.new()
 	grid.region = tileMap.get_used_rect()
 	grid.cell_size = tileMap.tile_set.tile_size
 	grid.diagonal_mode = AStarGrid2D.DIAGONAL_MODE_NEVER
 	grid.update()
+#endregion
 
-func _input(event: InputEvent) -> void:
-	if !event.is_action_pressed("ui_accept"):	return
-	
-	var _from = tileMap.local_to_map(myTile)
-	var _to = tileMap.local_to_map(get_global_mouse_position())
-	idPath = grid.get_id_path(_from, _to)
-	
-	otherIdPath = idPath		
-	for i in otherIdPath.size(): #Fix positions
-		otherIdPath[i] = tileMap.map_to_local(otherIdPath[i])
-		#otherIdPath[i] = tileMap.map_to_local(otherIdPath[i]) - global_position
-	
-func _draw():
-	#If has path to walk
-	if otherIdPath.size() > 1:
-		#Draw path line
-		draw_polyline(otherIdPath, Color.RED)
-		
-		#Draw circles on center of path tiles
-		for i in otherIdPath.size():
-			draw_circle(otherIdPath[i], 1, Color.RED)
+#region Draw Tiles
 
+func _drawMapTiles():
 	if tileMap:
 		#Draw squares on tiles
 		var arrayOfCells = tileMap.get_used_cells(0)#Get terrain cells
 		for i in arrayOfCells.size():
 			var _cellX = arrayOfCells[i].x * tileSize.x - get_transform().origin.x # fix vectors origin pos to upper left corner of screen
 			var _cellY = arrayOfCells[i].y * tileSize.y - get_transform().origin.y # fix vectors origin pos to upper left corner of screen
-			draw_rect(Rect2(_cellX, _cellY, tileSize.x, tileSize.y), Color.RED, false) 
+			var _tile = Rect2(_cellX, _cellY, tileSize.x, tileSize.y)
+			
+			#Update player tile
+			var _isPlayer = tileMap.local_to_map(player.position) == Vector2i(arrayOfCells[i].x, arrayOfCells[i].y)
+			if (_isPlayer):
+				gridPlayerTile = _tile
+				
+			#Update target tile
+			var _isWalkTarget = tileMap.local_to_map(finalTile) == Vector2i(arrayOfCells[i].x, arrayOfCells[i].y)
+			if (_isWalkTarget):
+				gridTargetTile = _tile
+			
+			draw_rect(_tile, Color.RED, false) 
+	#Draw above grid
+	draw_rect(gridPlayerTile, Color.GREEN, false) 
+	draw_rect(gridTargetTile, Color.BLUE, false) 
+	
+func _drawPathToWalk():
+	if printIdPath.size() > 1:
+		#Draw path line
+		var _fixedVectors = printIdPath.duplicate()
+		for i in _fixedVectors.size():
+			_fixedVectors[i] -= player.position
+		draw_polyline(_fixedVectors, Color.RED)
+		
+		#Draw circles on center of path tiles
+		for i in printIdPath.size():
+			draw_circle(printIdPath[i] - player.position, 1, Color.RED)
 
-func _get_input():
-	var _speed = 150
-	var input_direction = Input.get_vector("ui_left", "ui_right", "ui_up", "ui_down")
-	velocity = input_direction * _speed
+#endregion
 
-func _physics_process(_delta):
+#region Walk with WASD
+
+func _wasdWalk():
+	var _speed = 120
+	var _horizontal_input = Input.get_action_strength("ui_right") - Input.get_action_strength("ui_left")
+	var _vertical_input = Input.get_action_strength("ui_down") - Input.get_action_strength("ui_up")
 	
-	var _xPos = str(snapped(self.position.x, 0.01))
-	var _yPos = str(snapped(self.position.y, 0.01))
-	Debug.update(str(self), "PlayerPos X: " + _xPos + ", Y: " + _yPos)
+	#Don't walk diagonally
+	if abs(_horizontal_input) > abs(_vertical_input):
+		velocity = Vector2(_horizontal_input, 0).normalized() * _speed
+	else:
+		velocity = Vector2(0, _vertical_input).normalized() * _speed
+		
+	var current_position = get_global_transform().origin
+	var intended_position = current_position + Vector2(_horizontal_input, _vertical_input).normalized() * _speed * get_process_delta_time()
+
+	if _isValidWASDPosition(intended_position):
+		move_and_slide()
 	
-	_get_input()
-	move_and_slide()
+func _isValidWASDPosition(intended_position):
+	var tilemapOrigin = tileMap.get_used_rect().position
+
+	var intendedTilePosition = (intended_position - Vector2(tilemapOrigin)) / Vector2(tileSize)
+
+	if tileMap.get_cell_tile_data(0, intendedTilePosition):
+		#Walking on land
+		return true
 	
-	queue_redraw()
+	if tileMap.get_cell_tile_data(1, intendedTilePosition):
+		#Walking on land
+		return false
+
+#endregion
+
+#region Walk with mouse
+func _mouseWalk():
+	_updatePathToWalk()
+	if idPath.size() < 2:	return
+	
+	var targetPos = idPath[1]
+	
+	player.global_position = player.global_position.move_toward(targetPos, 1)
+	
+	if player.global_position == targetPos:
+		print(str(player.global_position) + " == " + str(targetPos))
+		#idPath.remove_at(0)
+		
+	
+func _updatePathToWalk():
+	var _from = tileMap.local_to_map(player.position)
+	var _to = tileMap.local_to_map(finalTile)
+	idPath = grid.get_id_path(_from, _to)
+	
+	printIdPath = idPath		
+	for i in printIdPath.size(): #Fix positions
+		printIdPath[i] = tileMap.map_to_local(printIdPath[i])
+
+#endregion
+
+func _updateDebugInfo():
+	if printIdPath.size() > 1:
+		Debug.update("WalkingPath", "WalkingPath: " + str(printIdPath[printIdPath.size() - 1]))
+		
+	var _xPos = str(snapped(self.position.x, 0.1))
+	var _yPos = str(snapped(self.position.y, 0.1))
+	Debug.update("PlayerInfo", "Player Pos: " + _xPos + ", Y: " + "" +  _yPos + str(tileMap.local_to_map(player.global_position)) + " / " + str(tileMap.map_to_local(player.global_position)))
+	Debug.update("PlayerGrid", "Player to Target: " + str(gridPlayerTile.position) + " / " + str(gridTargetTile.position))
+	Debug.update("currentIdPath", "currentIdPath: " + str(currentIdPath))
