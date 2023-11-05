@@ -147,7 +147,7 @@ layer_2/tile_data = PackedInt32Array(-196614, 2, 0, -196613, 65538, 0, -196612, 
 
 [node name="Player" type="CharacterBody2D" parent="."]
 unique_name_in_owner = true
-position = Vector2(64, 64)
+position = Vector2(72, 72)
 script = ExtResource("4_6usf4")
 
 [node name="Camera2D" type="Camera2D" parent="Player"]
@@ -155,7 +155,6 @@ visible = false
 zoom = Vector2(2, 2)
 
 [node name="Sprite2D" type="Sprite2D" parent="Player"]
-self_modulate = Color(1, 1, 1, 0.368627)
 texture = ExtResource("4_eo5eg")
 hframes = 4
 vframes = 4
@@ -179,4 +178,4 @@ offset_top = 2.0
 offset_right = 58.0
 offset_bottom = 21.0
 script = ExtResource("6_s5ic3")
-charSize = Vector2(9, 30)
+charSize = Vector2(8, 30)
