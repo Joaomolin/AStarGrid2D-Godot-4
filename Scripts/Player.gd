@@ -13,7 +13,7 @@ var idPath:PackedVector2Array
 var printIdPath:PackedVector2Array
 
 func _ready():	
-	Debug.update("helpText1", "Walk with WASD or Arrow keys")
+	Debug.update("helpText1", "Walk with WASD/Arrow keys")
 	Debug.update("helpText2", "Or use Mouse click/Space bar")
 	Debug.update("helpText3", " ")
 	#If WASD or Mouse click not working, add them in Project > Input Map
@@ -32,20 +32,7 @@ func _process(_delta):
 	
 	#Update debug info
 	Debug.update("PlayerGrid", "Pathwalk From: " + str(tileMap.local_to_map(player.position)) + ", To: " + str(tileMap.local_to_map(finalTile)))
-	Debug.update("MouseGrid", "Mouse: " + str(tileMap.local_to_map(get_global_mouse_position())))
-
-func _isWalkableTile(pos : Vector2i) -> bool:
-	#Ground layer
-	#If IS NOT a ground layer, can't walk
-	if !tileMap.get_cell_tile_data(0, pos):
-		return false
-	
-	#Overlay layer
-	#If IS Overlay, can't walk
-	if tileMap.get_cell_tile_data(1, pos):
-		return false
-	
-	return true
+	Debug.update("MouseGrid", "Mouse tile: " + str(tileMap.local_to_map(get_global_mouse_position())))
 
 #region Grid Setup
 	
@@ -70,6 +57,7 @@ func _setWalkableTiles():
 #region Player Movement
 
 func _playerWalk():
+	#Comment these to disable the inputs
 	_mouseInput()
 	_wasdInput()
 	
@@ -78,7 +66,7 @@ func _playerWalk():
 		return
 	
 	var targetPos = idPath[1]
-	var _speed = 2
+	var _speed = 1.5
 	player.global_position = player.global_position.move_toward(targetPos, _speed)
 	
 	if player.global_position == targetPos:
@@ -92,6 +80,21 @@ func _updatePathToWalk():
 	
 	for i in idPath.size(): #Fix positions
 		idPath[i] = tileMap.map_to_local(idPath[i])
+
+func _isWalkableTile(pos : Vector2i) -> bool:
+	#Ground layer
+	#If IS NOT a ground layer, can't walk
+	var groundLayer = 1
+	if !tileMap.get_cell_tile_data(groundLayer, pos):
+		return false
+	
+	#Overlay layer
+	#If IS Overlay, can't walk
+	var overlayLayer = 2
+	if tileMap.get_cell_tile_data(overlayLayer, pos):
+		return false
+	
+	return true
 
 #endregion
 
@@ -130,7 +133,7 @@ func _wasdInput():
 
 #endregion
 
-#region Draw Tiles
+#region Draw Tiles on the screen
 
 func _drawMapTiles():
 	var _playerTile : Rect2
