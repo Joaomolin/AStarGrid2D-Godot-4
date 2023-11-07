@@ -1,5 +1,4 @@
 extends CharacterBody2D
-
 @onready var player: Node2D = %Player
 
 #Grid
@@ -9,10 +8,14 @@ extends CharacterBody2D
 var grid: AStarGrid2D
 var idPath:PackedVector2Array
 
-#To print
-var printIdPath:PackedVector2Array
+#Debug buttons
+var printPath : bool = true
+var printGrid : bool = true
+var allowMouseInput : bool = true
+var allowWASDInput : bool = true
 
 func _ready():	
+	print(str(self.position)) 
 	Debug.update("helpText1", "Walk with WASD/Arrow keys")
 	Debug.update("helpText2", "Or use Mouse click/Space bar")
 	Debug.update("helpText3", " ")
@@ -24,11 +27,10 @@ func _ready():
 func _draw():
 	_drawPathToWalk()
 	_drawMapTiles()
-	pass
 	
 func _process(_delta):
 	_playerWalk()
-	queue_redraw()
+	queue_redraw() #Comment to remove grid
 	
 	#Update debug info
 	Debug.update("PlayerGrid", "Pathwalk From: " + str(tileMap.local_to_map(player.position)) + ", To: " + str(tileMap.local_to_map(finalTile)))
@@ -41,7 +43,8 @@ func _startGrid():
 	grid = AStarGrid2D.new()
 	grid.region = tileMap.get_used_rect()
 	grid.cell_size = tileMap.tile_set.tile_size
-	grid.diagonal_mode = AStarGrid2D.DIAGONAL_MODE_NEVER
+	#To enable diagonal movement, comment the line below
+	grid.diagonal_mode = AStarGrid2D.DIAGONAL_MODE_NEVER 
 	grid.update()
 	
 func _setWalkableTiles():
@@ -57,9 +60,10 @@ func _setWalkableTiles():
 #region Player Movement
 
 func _playerWalk():
-	#Comment these to disable the inputs
-	_mouseInput()
-	_wasdInput()
+	if allowMouseInput:
+		_mouseInput()
+	if allowWASDInput:
+		_wasdInput()
 	
 	if idPath.size() < 2:
 		_updatePathToWalk()
@@ -81,17 +85,17 @@ func _updatePathToWalk():
 	for i in idPath.size(): #Fix positions
 		idPath[i] = tileMap.map_to_local(idPath[i])
 
-func _isWalkableTile(pos : Vector2i) -> bool:
+func _isWalkableTile(tile : Vector2i) -> bool:
 	#Ground layer
 	#If IS NOT a ground layer, can't walk
 	var groundLayer = 1
-	if !tileMap.get_cell_tile_data(groundLayer, pos):
+	if !tileMap.get_cell_tile_data(groundLayer, tile):
 		return false
 	
 	#Overlay layer
 	#If IS Overlay, can't walk
 	var overlayLayer = 2
-	if tileMap.get_cell_tile_data(overlayLayer, pos):
+	if tileMap.get_cell_tile_data(overlayLayer, tile):
 		return false
 	
 	return true
@@ -112,22 +116,34 @@ func _mouseInput():
 
 func _wasdInput():
 	var _walkVector = Vector2(0, 0)
+	var _noDiagonal = grid.diagonal_mode == AStarGrid2D.DIAGONAL_MODE_NEVER
+	
 	if Input.is_action_pressed("ui_left"):
-		Debug.update("_walkVector", "WASD Walk left")
-		_walkVector = Vector2(-tileSize.x, 0)
+		if _noDiagonal:
+			_walkVector = Vector2(-tileSize.x, 0)
+		else:
+			_walkVector += Vector2(-tileSize.x, 0)
+			
 		
 	if Input.is_action_pressed("ui_right"):
-		Debug.update("_walkVector", "WASD Walk right")
-		_walkVector = Vector2(tileSize.x, 0)
-		
+		if _noDiagonal:
+			_walkVector = Vector2(tileSize.x, 0)
+		else:
+			_walkVector += Vector2(tileSize.x, 0)
+			
 	if Input.is_action_pressed("ui_up"):
-		Debug.update("_walkVector", "WASD Walk up")
-		_walkVector = Vector2(0, -tileSize.y)
-		
+		if _noDiagonal:
+			_walkVector = Vector2(0, -tileSize.y)
+		else:
+			_walkVector += Vector2(0, -tileSize.y)
+			
 	if Input.is_action_pressed("ui_down"):
-		Debug.update("_walkVector", "WASD Walk down")
-		_walkVector = Vector2(0, tileSize.y)
-	
+		if _noDiagonal:
+			_walkVector = Vector2(0, tileSize.y)
+		else:
+			_walkVector += Vector2(0, tileSize.y)
+			
+	Debug.update("_walkVector", "WASD Walk: " + str(_walkVector / Vector2(tileSize)))
 	if _walkVector:
 		finalTile = player.position + _walkVector
 
@@ -141,7 +157,8 @@ func _drawMapTiles():
 	
 	if tileMap:
 		#Draw squares on tiles
-		var arrayOfCells = tileMap.get_used_cells(0)#Get terrain cells
+		var _terrainCell = 1
+		var arrayOfCells = tileMap.get_used_cells(_terrainCell)#Get terrain cells
 		for i in arrayOfCells.size():
 			#Create tile
 			var _cellX = arrayOfCells[i].x * tileSize.x - get_transform().origin.x # fix vectors origin pos to upper left corner of screen
@@ -159,27 +176,30 @@ func _drawMapTiles():
 				_targetTile = _tile
 			
 			#Draw red grid above all walkable tiles
-			#_printTile(_tile)
+			if printGrid:
+				_printTile(_tile)
 		
 	#Draw target tile above red grid
-	_printTile(_targetTile, Color.GREEN)
+	if printPath:
+		_printTile(_targetTile, Color.GREEN)
 	#Draw player above red grid
-	_printTile(_playerTile, Color.BLUE)
+	if printPath:
+		_printTile(_playerTile, Color.BLUE)
 	
 func _printTile(tile : Rect2, color : Color = Color.RED):
 	if tile:
 		draw_rect(tile, color, false) 
 		
-func _drawPathToWalk():
-	if idPath.size() > 1:
-		#Draw path line
-		var _fixedVectors = idPath.duplicate()
-		for i in _fixedVectors.size():
-			_fixedVectors[i] -= player.position
-		draw_polyline(_fixedVectors, Color.RED)
+func _drawPathToWalk():	
+	if idPath.size() < 2 || !printPath:	return
 		
-		#Draw circles on center of tiles
-		for i in idPath.size():
-			draw_circle(idPath[i] - player.position, 1, Color.RED)
-
+	#Draw path line
+	var _fixedVectors = idPath.duplicate()
+	for i in _fixedVectors.size():
+		_fixedVectors[i] -= player.position
+	draw_polyline(_fixedVectors, Color.RED)
+	
+	#Draw circles on center of tiles
+	for i in idPath.size():
+		draw_circle(idPath[i] - player.position, 1, Color.RED)
 #endregion
