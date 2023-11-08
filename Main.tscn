@@ -168,15 +168,17 @@ shape = SubResource("RectangleShape2D_brjjd")
 [node name="Buttons" type="Node2D" parent="Debug UI"]
 script = ExtResource("7_nxvwj")
 
-[node name="Diagonal" type="Button" parent="Debug UI/Buttons"]
-offset_left = 609.0
+[node name="BtnDiagonal" type="Button" parent="Debug UI/Buttons"]
+unique_name_in_owner = true
+offset_left = 669.0
 offset_top = 5.0
 offset_right = 796.0
 offset_bottom = 36.0
-text = "Change Diagonal mode"
+text = "Diagonal mode"
 alignment = 2
 
-[node name="Path Draw" type="Button" parent="Debug UI/Buttons"]
+[node name="BtnPath Draw" type="Button" parent="Debug UI/Buttons"]
+unique_name_in_owner = true
 offset_left = 662.0
 offset_top = 39.0
 offset_right = 796.0
@@ -184,7 +186,8 @@ offset_bottom = 70.0
 text = "Toggle Pathwalk"
 alignment = 2
 
-[node name="Grid Draw" type="Button" parent="Debug UI/Buttons"]
+[node name="BtnGrid Draw" type="Button" parent="Debug UI/Buttons"]
+unique_name_in_owner = true
 offset_left = 703.0
 offset_top = 73.0
 offset_right = 796.0
@@ -192,7 +195,8 @@ offset_bottom = 104.0
 text = "Toggle grid"
 alignment = 2
 
-[node name="Mouse Walk" type="Button" parent="Debug UI/Buttons"]
+[node name="BtnMouse Walk" type="Button" parent="Debug UI/Buttons"]
+unique_name_in_owner = true
 offset_left = 642.0
 offset_top = 106.0
 offset_right = 797.0
@@ -200,7 +204,8 @@ offset_bottom = 137.0
 text = "Toggle mouse walk"
 alignment = 2
 
-[node name="WASD Walk" type="Button" parent="Debug UI/Buttons"]
+[node name="BtnWASD Walk" type="Button" parent="Debug UI/Buttons"]
+unique_name_in_owner = true
 offset_left = 642.0
 offset_top = 139.0
 offset_right = 797.0
@@ -224,8 +229,8 @@ offset_bottom = 21.0
 script = ExtResource("6_s5ic3")
 charSize = Vector2(8, 30)
 
-[connection signal="pressed" from="Debug UI/Buttons/Diagonal" to="Debug UI/Buttons" method="_on_diagonal_mode_pressed"]
-[connection signal="pressed" from="Debug UI/Buttons/Path Draw" to="Debug UI/Buttons" method="_on_toggle_path_pressed"]
-[connection signal="pressed" from="Debug UI/Buttons/Grid Draw" to="Debug UI/Buttons" method="_on_toggle_grid_pressed"]
-[connection signal="pressed" from="Debug UI/Buttons/Mouse Walk" to="Debug UI/Buttons" method="_on_toggle_mouse_walk_pressed"]
-[connection signal="pressed" from="Debug UI/Buttons/WASD Walk" to="Debug UI/Buttons" method="_on_toggle_WASD_movement_pressed"]
+[connection signal="pressed" from="Debug UI/Buttons/BtnDiagonal" to="Debug UI/Buttons" method="_on_diagonal_mode_pressed"]
+[connection signal="pressed" from="Debug UI/Buttons/BtnPath Draw" to="Debug UI/Buttons" method="_on_toggle_path_pressed"]
+[connection signal="pressed" from="Debug UI/Buttons/BtnGrid Draw" to="Debug UI/Buttons" method="_on_toggle_grid_pressed"]
+[connection signal="pressed" from="Debug UI/Buttons/BtnMouse Walk" to="Debug UI/Buttons" method="_on_toggle_mouse_walk_pressed"]
+[connection signal="pressed" from="Debug UI/Buttons/BtnWASD Walk" to="Debug UI/Buttons" method="_on_toggle_WASD_movement_pressed"]
