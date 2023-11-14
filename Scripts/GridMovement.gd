@@ -146,10 +146,13 @@ func _keyboardPressed(keyPressed : String, _noDiagonal : bool, _walkVector : Vec
 		
 	if Input.is_action_pressed(keyPressed):
 		if _noDiagonal:
-			if !_walkVector && _isWalkableTile(tileMap.local_to_map(player.position + _position)):
+			if _isWalkableTile(tileMap.local_to_map(player.position + _position)):
 				return _position
 		else:
-			return _walkVector + _position
+			if _isWalkableTile(tileMap.local_to_map(player.position + _walkVector + _position)):
+				return _walkVector + _position
+			elif _isWalkableTile(tileMap.local_to_map(player.position + _position)):
+				return _position
 	
 	return _walkVector
 	
