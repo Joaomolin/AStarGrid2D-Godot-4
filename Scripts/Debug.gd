@@ -26,6 +26,6 @@ func update(_id : String, _text : String):
 			return
 	
 	#If can't find, create one 
-	print("Creating " + _id)
+	#print("Creating " + _id)
 	add(str(_id))
 	update(_id, _text)

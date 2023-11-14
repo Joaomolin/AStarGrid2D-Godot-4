@@ -1,5 +1,6 @@
 extends CharacterBody2D
 @onready var player: Node2D = %Player
+var flippingBool : bool = false
 
 #Grid
 @onready var tileMap: TileMap = %TileMap
@@ -9,7 +10,7 @@ var grid: AStarGrid2D
 var idPath:PackedVector2Array
 
 #Debug buttons
-var _lastKeyPressed : String
+var _lastKeyPressed : Array[String]
 var printPath : bool = true
 var printGrid : bool = true
 var allowMouseInput : bool = true
@@ -37,6 +38,14 @@ func _process(_delta):
 	Debug.update("PlayerGrid", "Pathwalk From: " + str(tileMap.local_to_map(player.position)) + ", To: " + str(tileMap.local_to_map(finalTile)))
 	Debug.update("MouseGrid", "Mouse tile: " + str(tileMap.local_to_map(get_global_mouse_position())))
 
+func _input(event):
+	#Mouse input
+	if allowMouseInput:
+		if event.is_action_pressed("ui_accept"):
+			#Update finalTile as mouse position, if is a walkable tile
+			if _isWalkableTile(tileMap.local_to_map(get_global_mouse_position())):
+				finalTile = get_global_mouse_position()
+	
 #region Grid Setup
 	
 func _startGrid():	
@@ -74,7 +83,6 @@ func _playerWalk():
 		_updatePathToWalk()
 
 func _updatePathToWalk():
-	_mouseInput()
 	_wasdInput()
 		
 	var _from = tileMap.local_to_map(player.position)
@@ -102,50 +110,35 @@ func _isWalkableTile(tile : Vector2i) -> bool:
 
 #endregion
 
-#region Walk with Mouse/Space bar
-
-func _mouseInput():	
-	if !allowMouseInput:	return
-	
-	if Input.is_action_pressed("ui_accept"):
-		#Update finalTile as mouse position, if is a walkable tile
-		if _isWalkableTile(tileMap.local_to_map(get_global_mouse_position())):
-			finalTile = get_global_mouse_position()
-
-#endregion
-
 #region Walk with WASD/Arrows
 
 func _wasdInput():	
 	if !allowWASDInput:	return
 	
-	var _noDiagonal = grid.diagonal_mode == AStarGrid2D.DIAGONAL_MODE_NEVER
 	#Vectors
 	var _walkVector = Vector2.ZERO
+	var actions = ["ui_left", "ui_right", "ui_up", "ui_down"]
+	var directions = [Vector2.LEFT, Vector2.RIGHT, Vector2.UP, Vector2.DOWN]
 	
-	var left = "ui_left"
-	var right = "ui_right"
-	var up = "ui_up"
-	var down = "ui_down"
+	flippingBool = !flippingBool
+	var order = [0, 1, 2, 3] if flippingBool else [3, 2, 1, 0]
 	
-	#Fix last key pressed
-	_walkVector = _keyboardPressed(left, _noDiagonal, _walkVector, Vector2.LEFT * Vector2(tileSize))
-	_walkVector = _keyboardPressed(right, _noDiagonal, _walkVector, Vector2.RIGHT * Vector2(tileSize))
-	_walkVector = _keyboardPressed(up, _noDiagonal, _walkVector, Vector2.UP * Vector2(tileSize))
-	_walkVector = _keyboardPressed(down, _noDiagonal, _walkVector, Vector2.DOWN * Vector2(tileSize))
-
+	for i in order:
+		_walkVector = _keyboardPressed(actions[i], _walkVector, directions[i])
 	
 	Debug.update("_walkVector", "WASD Walk: " + str(_walkVector / Vector2(tileSize)))
 	
 	if _walkVector:
 		finalTile = player.position + _walkVector
 		
-func _keyboardPressed(keyPressed : String, _noDiagonal : bool, _walkVector : Vector2, _position : Vector2 ) -> Vector2:
-	if Input.is_action_just_pressed(keyPressed):
-		_lastKeyPressed = keyPressed
-		
+func _keyboardPressed(keyPressed : String, _walkVector : Vector2, _position : Vector2 ) -> Vector2:
+	var _noDiagonal = grid.diagonal_mode == AStarGrid2D.DIAGONAL_MODE_NEVER
+	_position *= Vector2(tileSize)
+	
 	if Input.is_action_pressed(keyPressed):
 		if _noDiagonal:
+			#if _isWalkableTile(tileMap.local_to_map(player.position + _walkVector + _position)):
+				#return _walkVector + _position
 			if _isWalkableTile(tileMap.local_to_map(player.position + _position)):
 				return _position
 		else:
