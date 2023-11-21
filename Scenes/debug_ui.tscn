@@ -1,0 +1,81 @@
+[gd_scene load_steps=3 format=3 uid="uid://byptuxr2g2gbd"]
+
+[ext_resource type="Script" path="res://Scripts/Buttons.gd" id="1_up1k8"]
+[ext_resource type="Script" path="res://Scripts/DebugUI.gd" id="2_2wfwf"]
+
+[node name="Debug UI" type="CanvasLayer"]
+
+[node name="Buttons" type="Node2D" parent="."]
+script = ExtResource("1_up1k8")
+
+[node name="BtnDiagonal" type="Button" parent="Buttons"]
+unique_name_in_owner = true
+offset_left = 669.0
+offset_top = 5.0
+offset_right = 796.0
+offset_bottom = 36.0
+focus_mode = 0
+text = "Diagonal mode"
+alignment = 2
+
+[node name="BtnPath Draw" type="Button" parent="Buttons"]
+unique_name_in_owner = true
+offset_left = 662.0
+offset_top = 39.0
+offset_right = 796.0
+offset_bottom = 70.0
+focus_mode = 0
+text = "Toggle Pathwalk"
+alignment = 2
+
+[node name="BtnGrid Draw" type="Button" parent="Buttons"]
+unique_name_in_owner = true
+offset_left = 703.0
+offset_top = 73.0
+offset_right = 796.0
+offset_bottom = 104.0
+focus_mode = 0
+text = "Toggle grid"
+alignment = 2
+
+[node name="BtnMouse Walk" type="Button" parent="Buttons"]
+unique_name_in_owner = true
+offset_left = 642.0
+offset_top = 106.0
+offset_right = 797.0
+offset_bottom = 137.0
+focus_mode = 0
+text = "Toggle mouse walk"
+alignment = 2
+
+[node name="BtnWASD Walk" type="Button" parent="Buttons"]
+unique_name_in_owner = true
+offset_left = 642.0
+offset_top = 139.0
+offset_right = 797.0
+offset_bottom = 170.0
+focus_mode = 0
+text = "Toggle WASD walk"
+alignment = 2
+
+[node name="DebugBackground" type="Panel" parent="."]
+unique_name_in_owner = true
+offset_left = -2.0
+offset_top = -2.0
+offset_right = 68.0
+offset_bottom = -2.0
+
+[node name="DebugContainer" type="VBoxContainer" parent="."]
+unique_name_in_owner = true
+offset_left = 3.0
+offset_top = 2.0
+offset_right = 58.0
+offset_bottom = 21.0
+script = ExtResource("2_2wfwf")
+charSize = Vector2(8, 30)
+
+[connection signal="pressed" from="Buttons/BtnDiagonal" to="Buttons" method="_on_diagonal_mode_pressed"]
+[connection signal="pressed" from="Buttons/BtnPath Draw" to="Buttons" method="_on_toggle_path_pressed"]
+[connection signal="pressed" from="Buttons/BtnGrid Draw" to="Buttons" method="_on_toggle_grid_pressed"]
+[connection signal="pressed" from="Buttons/BtnMouse Walk" to="Buttons" method="_on_toggle_mouse_walk_pressed"]
+[connection signal="pressed" from="Buttons/BtnWASD Walk" to="Buttons" method="_on_toggle_WASD_movement_pressed"]

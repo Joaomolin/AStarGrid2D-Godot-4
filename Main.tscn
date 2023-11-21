@@ -1,12 +1,10 @@
-[gd_scene load_steps=14 format=3 uid="uid://dbj1cglym2a2m"]
+[gd_scene load_steps=11 format=3 uid="uid://dbj1cglym2a2m"]
 
 [ext_resource type="Texture2D" uid="uid://cbcvhydljbybo" path="res://Assets/Grass.png" id="1_i3t7s"]
 [ext_resource type="Texture2D" uid="uid://ixp7fx4ysi22" path="res://Assets/Fences.png" id="2_xx8vf"]
 [ext_resource type="Texture2D" uid="uid://dnjd4r5y4k1qb" path="res://Assets/Water.png" id="3_qadt5"]
-[ext_resource type="Script" path="res://Scripts/GridMovement.gd" id="4_6usf4"]
-[ext_resource type="Texture2D" uid="uid://0mhq4mfa3c7" path="res://Assets/Basic Charakter Spritesheet.png" id="4_eo5eg"]
-[ext_resource type="Script" path="res://Scripts/DebugUI.gd" id="6_s5ic3"]
-[ext_resource type="Script" path="res://Scripts/Buttons.gd" id="7_nxvwj"]
+[ext_resource type="PackedScene" uid="uid://dtalvwug7brcp" path="res://Scenes/player.tscn" id="4_pjcxj"]
+[ext_resource type="PackedScene" uid="uid://byptuxr2g2gbd" path="res://Scenes/debug_ui.tscn" id="5_ilw40"]
 
 [sub_resource type="TileMapPattern" id="TileMapPattern_1uoc3"]
 tile_data = PackedInt32Array(0, 131072, 4, 65536, 131072, 4, 131072, 131072, 4, 1, 131072, 4, 65537, 131072, 4, 131073, 131072, 4, 2, 131072, 4, 65538, 131072, 4, 131074, 131072, 4)
@@ -117,9 +115,6 @@ sources/1 = SubResource("TileSetAtlasSource_nto56")
 sources/2 = SubResource("TileSetAtlasSource_73l1l")
 pattern_0 = SubResource("TileMapPattern_1uoc3")
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_brjjd"]
-size = Vector2(14, 16)
-
 [node name="Main" type="Node2D"]
 
 [node name="TileMap" type="TileMap" parent="."]
@@ -147,90 +142,14 @@ layer_2/z_index = 0
 layer_2/navigation_enabled = true
 layer_2/tile_data = PackedInt32Array(327696, 65537, 2, 327697, 131073, 2, 327698, 196609, 2, 327691, 65537, 2, 327692, 131073, 2, 327693, 131073, 2, 327694, 196609, 2, 720905, 131073, 3, 720899, 65537, 0, 786435, 1, 0, 851971, 1, 1, 917507, 1, 1, 983043, 65537, 2, 720900, 131073, 3, 720901, 131073, 3, 720902, 131073, 3, 720903, 131073, 3, 720904, 131073, 3, 720906, 131073, 3, 983050, 131073, 3, 983051, 131073, 3, 983052, 131073, 3, 983053, 131073, 3, 917518, 1, 1, 983054, 196609, 2, 983045, 196609, 3, 983047, 65537, 3, 720908, 196609, 3, 720910, 1, 0, 851982, 1, 1, 786446, 1, 1, 983044, 131073, 3, 983048, 131073, 3, 983049, 131073, 3, 720907, 131073, 3)
 
-[node name="Player" type="CharacterBody2D" parent="."]
+[node name="Player" parent="." instance=ExtResource("4_pjcxj")]
 unique_name_in_owner = true
-position = Vector2(72, 72)
-script = ExtResource("4_6usf4")
 
-[node name="Camera2D" type="Camera2D" parent="Player"]
-zoom = Vector2(2, 2)
+[node name="AnimationTree" parent="Player" index="5"]
+parameters/Idle/blend_position = Vector2(-0.186441, 0.57672)
 
-[node name="Sprite2D" type="Sprite2D" parent="Player"]
-texture = ExtResource("4_eo5eg")
-hframes = 4
-vframes = 4
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Player"]
-shape = SubResource("RectangleShape2D_brjjd")
-
-[node name="Debug UI" type="CanvasLayer" parent="."]
-
-[node name="Buttons" type="Node2D" parent="Debug UI"]
-script = ExtResource("7_nxvwj")
-
-[node name="BtnDiagonal" type="Button" parent="Debug UI/Buttons"]
+[node name="Debug UI" parent="." instance=ExtResource("5_ilw40")]
 unique_name_in_owner = true
-offset_left = 669.0
-offset_top = 5.0
-offset_right = 796.0
-offset_bottom = 36.0
-text = "Diagonal mode"
-alignment = 2
 
-[node name="BtnPath Draw" type="Button" parent="Debug UI/Buttons"]
-unique_name_in_owner = true
-offset_left = 662.0
-offset_top = 39.0
-offset_right = 796.0
-offset_bottom = 70.0
-text = "Toggle Pathwalk"
-alignment = 2
-
-[node name="BtnGrid Draw" type="Button" parent="Debug UI/Buttons"]
-unique_name_in_owner = true
-offset_left = 703.0
-offset_top = 73.0
-offset_right = 796.0
-offset_bottom = 104.0
-text = "Toggle grid"
-alignment = 2
-
-[node name="BtnMouse Walk" type="Button" parent="Debug UI/Buttons"]
-unique_name_in_owner = true
-offset_left = 642.0
-offset_top = 106.0
-offset_right = 797.0
-offset_bottom = 137.0
-text = "Toggle mouse walk"
-alignment = 2
-
-[node name="BtnWASD Walk" type="Button" parent="Debug UI/Buttons"]
-unique_name_in_owner = true
-offset_left = 642.0
-offset_top = 139.0
-offset_right = 797.0
-offset_bottom = 170.0
-text = "Toggle WASD walk"
-alignment = 2
-
-[node name="DebugBackground" type="Panel" parent="Debug UI"]
-unique_name_in_owner = true
-offset_left = -2.0
-offset_top = -2.0
-offset_right = 68.0
-offset_bottom = -2.0
-
-[node name="DebugContainer" type="VBoxContainer" parent="Debug UI"]
-unique_name_in_owner = true
-offset_left = 3.0
-offset_top = 2.0
-offset_right = 58.0
-offset_bottom = 21.0
-script = ExtResource("6_s5ic3")
-charSize = Vector2(8, 30)
-
-[connection signal="pressed" from="Debug UI/Buttons/BtnDiagonal" to="Debug UI/Buttons" method="_on_diagonal_mode_pressed"]
-[connection signal="pressed" from="Debug UI/Buttons/BtnPath Draw" to="Debug UI/Buttons" method="_on_toggle_path_pressed"]
-[connection signal="pressed" from="Debug UI/Buttons/BtnGrid Draw" to="Debug UI/Buttons" method="_on_toggle_grid_pressed"]
-[connection signal="pressed" from="Debug UI/Buttons/BtnMouse Walk" to="Debug UI/Buttons" method="_on_toggle_mouse_walk_pressed"]
-[connection signal="pressed" from="Debug UI/Buttons/BtnWASD Walk" to="Debug UI/Buttons" method="_on_toggle_WASD_movement_pressed"]
+[editable path="Player"]
+[editable path="Debug UI"]

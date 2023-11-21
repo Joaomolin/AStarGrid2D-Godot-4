@@ -1,9 +1,8 @@
 extends Node2D
 
-@onready var player: Node2D = %Player
+@onready var player: CharacterBody2D = get_node("/root/Main/Player")
 
 #btns
-
 @onready var btn_diagonal: Button = %BtnDiagonal
 @onready var btn_path_draw: Button = %"BtnPath Draw"
 @onready var btn_grid_draw: Button = %"BtnGrid Draw"
@@ -48,6 +47,7 @@ func _on_toggle_grid_pressed() -> void:
 
 func _on_toggle_mouse_walk_pressed() -> void:
 	player.allowMouseInput = !player.allowMouseInput
+	
 	_updateButtonsColors()
 	
 func _on_toggle_WASD_movement_pressed() -> void:

@@ -1,5 +1,7 @@
 extends CharacterBody2D
-@onready var player: Node2D = %Player
+
+@onready var player: CharacterBody2D = $"."
+
 var flippingBool : bool = false
 
 #Grid
@@ -10,14 +12,12 @@ var grid: AStarGrid2D
 var idPath:PackedVector2Array
 
 #Debug buttons
-var _lastKeyPressed : Array[String]
 var printPath : bool = true
 var printGrid : bool = true
 var allowMouseInput : bool = true
 var allowWASDInput : bool = true
 
 func _ready():	
-	print(str(self.position)) 
 	Debug.update("helpText1", "Walk with WASD/Arrow keys")
 	Debug.update("helpText2", "Or use Mouse click/Space bar")
 	Debug.update("helpText3", " ")
@@ -37,8 +37,8 @@ func _process(_delta):
 	#Update debug info
 	Debug.update("PlayerGrid", "Pathwalk From: " + str(tileMap.local_to_map(player.position)) + ", To: " + str(tileMap.local_to_map(finalTile)))
 	Debug.update("MouseGrid", "Mouse tile: " + str(tileMap.local_to_map(get_global_mouse_position())))
-
-func _input(event):
+	
+func _unhandled_input (event):
 	#Mouse input
 	if allowMouseInput:
 		if event.is_action_pressed("ui_accept"):
@@ -60,7 +60,6 @@ func _setWalkableTiles():
 	for x in tileMap.get_used_rect().size.x:
 		for y in tileMap.get_used_rect().size.y:
 			var _gridTile = Vector2i(x + tileMap.get_used_rect().position.x, y + tileMap.get_used_rect().position.y)
-	
 			if !_isWalkableTile(_gridTile):
 				grid.set_point_solid(_gridTile)
 
@@ -168,19 +167,19 @@ func _drawMapTiles():
 			var _cellY = arrayOfCells[i].y * tileSize.y - get_transform().origin.y # fix vectors origin pos to upper left corner of screen
 			var _tile = Rect2(_cellX, _cellY, tileSize.x, tileSize.y)
 			
-			#Update player tile
+			#Update if player tile
 			var _isPlayer = tileMap.local_to_map(player.position) == Vector2i(arrayOfCells[i].x, arrayOfCells[i].y)
 			if (_isPlayer):
 				_playerTile = _tile
 				
-			#Update target tile
+			#Update if target tile
 			var _isWalkTarget = tileMap.local_to_map(finalTile) == Vector2i(arrayOfCells[i].x, arrayOfCells[i].y)
 			if (_isWalkTarget):
 				_targetTile = _tile
 			
 			#Draw red grid above all walkable tiles
-			if printGrid:
-				_printTile(_tile)
+			if printGrid && _isWalkableTile(Vector2i(arrayOfCells[i].x, arrayOfCells[i].y)):
+				_printTile(_tile, Color.RED)
 		
 	#Draw target tile above red grid
 	if printPath:
@@ -189,7 +188,7 @@ func _drawMapTiles():
 	if printPath:
 		_printTile(_playerTile, Color.BLUE)
 	
-func _printTile(tile : Rect2, color : Color = Color.RED):
+func _printTile(tile : Rect2, color : Color = Color.BLACK):
 	if tile:
 		draw_rect(tile, color, false) 
 		
